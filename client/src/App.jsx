@@ -1,20 +1,57 @@
 import { useState } from 'react'
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Link, NavLink } from "react-router-dom";
 import HomePage from "./pages/home";
-import AuthPage from "./pages/auth";
+import JoinPage from "./pages/join";
 import PageNotFound from "./pages/404";
 
-import './App.css'
+//import './App.css'
+import './css/mystyles.css';
+
+const activeStyle = {
+  color: '#8A4D76',
+  fontWeight: 'bold'
+}
+
+const deactiveStyle = {
+  color: 'black',
+  testDecoration: 'none'
+}
 
 function App() {
   return (
     <div>
-      <h1>Hello</h1>
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage/>}/>
-      </Routes>
-    </Router>
+      <Router>
+      <nav className="navbar" role="navigation" aria-label="main navigation">
+        <div className="navber-brand">
+          <a href="https://sparcs.org" className="navbar-item">
+            <img src="/Symbol_black.png" className="navbar-brand" />
+            <h1 className="title">&nbsp;&nbsp;Issue</h1>
+          </a>
+        </div>
+        <div className="navbar-item">
+          <NavLink to="/" style={({isActive}) => {
+            return isActive ? activeStyle : deactiveStyle;
+          }}>홈</NavLink>
+        </div>
+        <div className="navbar-item">
+          <NavLink to="/login" style={({isActive}) => {
+            return isActive ? activeStyle : deactiveStyle;
+          }}>로그인</NavLink>
+        </div>
+        <div className="navbar-item">
+          <NavLink to="/join" style={({isActive}) => {
+            return isActive ? activeStyle : deactiveStyle;
+          }}>회원가입</NavLink>
+        </div>
+      </nav>
+      <div>
+      
+        <Routes>
+          <Route path="/" element={<HomePage/>}/>
+          <Route path="/join" element={<JoinPage/>}/>
+        </Routes>
+      </div>
+      </Router>
     </div>
   )
 
