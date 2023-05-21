@@ -28,5 +28,6 @@ router.post('/adduser', async (req, res) => { // 한번 해봤는데
     return res.status(500).json({ error: `adduser 오류` });
   }
 })
-
+// role이 비어 있으면 foreign key 문제로 못 넣음! -> pgAdmin에서나 쉘에서 직접 insert 문으로 넣어줘야 함.
+// (1, "regularUser"), (2, "bannedUser"), (3, admin)
 export default router;
