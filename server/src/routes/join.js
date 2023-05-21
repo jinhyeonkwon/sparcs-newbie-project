@@ -24,7 +24,8 @@ router.post('/adduser', async (req, res) => { // 한번 해봤는데
 
     return res.status(200).json({isOK:true});
   } catch (e) {
-    return res.status(500).json({ error: `adduser 오류, ${e}` });
+    console.error(e);
+    return res.status(500).json({ error: `adduser 오류` });
   }
 })
 
