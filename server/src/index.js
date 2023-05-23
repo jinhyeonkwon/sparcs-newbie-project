@@ -33,7 +33,7 @@ const corsOptions = {
     else callback(new Error('Not Allowed by CORS'));
   },
   credentials: true,
-	AllowCredentials: true,
+	AllowCredentials: true, // 쿠키 사용하려면 필요!
 };
 
 if (process.env.ENVIRONMENT === 'development'){
