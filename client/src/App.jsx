@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Route, Routes, Link, NavLink } from "react-router-dom";
 import HomePage from "./pages/home";
 import JoinPage from "./pages/join";
+import LoginPage from "./pages/login";
 import PageNotFound from "./pages/404";
 
 //import './App.css'
@@ -24,8 +25,8 @@ function App() {
       <nav className="navbar" role="navigation" aria-label="main navigation">
         <div className="navber-brand">
           <a href="https://sparcs.org" className="navbar-item">
-            <img src="/Symbol_black.png" className="navbar-brand" />
-            <h1 className="title">&nbsp;&nbsp;Issue</h1>
+            <img src="/Symbol_black.png" className="navbar-brand" style={{marginRight: '10px', marginBottom: '5px'}}/>
+            <h1 className="title">Issue</h1>
           </a>
         </div>
         <div className="navbar-item">
@@ -49,6 +50,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage/>}/>
           <Route path="/join" element={<JoinPage/>}/>
+          <Route path="/login" element={<LoginPage/>}/>
         </Routes>
       </div>
       </Router>

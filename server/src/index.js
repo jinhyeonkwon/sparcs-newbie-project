@@ -18,6 +18,7 @@ if (process.env.ENVIRONMENT === "DEVELOPMENT") {
 import authRouter from './routes/auth.js';
 import mainRouter from './routes/main.js';
 import joinRouter from './routes/join.js';
+import loginRouter from './routes/login.js';
 
 const app = express();
 const port = process.env.EXPRESS_PORT;
@@ -32,6 +33,7 @@ const corsOptions = {
     else callback(new Error('Not Allowed by CORS'));
   },
   credentials: true,
+	AllowCredentials: true,
 };
 
 if (process.env.ENVIRONMENT === 'development'){
@@ -48,6 +50,7 @@ app.use(cors(corsOptions));
 app.use('/auth', authRouter);
 app.use('/join', joinRouter)
 app.use('/', mainRouter);
+app.use('/login', loginRouter);
 
 app.use((req, res, next) => { // 404
 	const error = new Error('[Server] 존재하지 않는 주소입니다.');

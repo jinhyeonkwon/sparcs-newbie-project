@@ -21,7 +21,7 @@ const HomePage = () => {
 
   return (
     <div className="columns">
-      <div className="column" style={{padding: '10px'}}>
+      <div className="column" style={{margin: '10px', padding: '10px'}}>
         <img src="/transparent_kaist_map.png"></img>
       </div>
       <div className="column">
