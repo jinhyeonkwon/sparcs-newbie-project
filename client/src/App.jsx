@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { BrowserRouter as Router, Route, Routes, Link, NavLink } from "react-router-dom";
+import { useCookies } from 'react-cookie';
 import HomePage from "./pages/home";
 import JoinPage from "./pages/join";
 import LoginPage from "./pages/login";
@@ -29,20 +30,27 @@ function App() {
             <h1 className="title">Issue</h1>
           </a>
         </div>
-        <div className="navbar-item">
-          <NavLink to="/" style={({isActive}) => {
-            return isActive ? activeStyle : deactiveStyle;
-          }}>홈</NavLink>
+        <div className="navbar-menu">
+          <div className="navbar-item">
+            <NavLink to="/" style={({isActive}) => {
+              return isActive ? activeStyle : deactiveStyle;
+            }}>홈</NavLink>
+          </div>
+          <div className="navbar-item">
+            <NavLink to="/login" style={({isActive}) => {
+              return isActive ? activeStyle : deactiveStyle;
+            }}>로그인</NavLink>
+          </div>
+          <div className="navbar-item">
+            <NavLink to="/join" style={({isActive}) => {
+              return isActive ? activeStyle : deactiveStyle;
+            }}>회원가입</NavLink>
+          </div>
         </div>
-        <div className="navbar-item">
-          <NavLink to="/login" style={({isActive}) => {
-            return isActive ? activeStyle : deactiveStyle;
-          }}>로그인</NavLink>
-        </div>
-        <div className="navbar-item">
-          <NavLink to="/join" style={({isActive}) => {
-            return isActive ? activeStyle : deactiveStyle;
-          }}>회원가입</NavLink>
+        <div className='navbar-end'>
+          <div className="navbar-item">
+            <p>로그인해 주세요</p>
+          </div>
         </div>
       </nav>
       <div>

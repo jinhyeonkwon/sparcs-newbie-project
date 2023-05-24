@@ -27,6 +27,7 @@ model User {
 model Location {
   id Int @id @default(autoincrement())
   locationName String @unique @db.VarChar(30)
+  locationNum String @unique @db.VarChar(10)
   issues Issue[]
 }
 model Issue {
