@@ -32,10 +32,11 @@ model Location {
 }
 model Issue {
   id Int @id @default(autoincrement())
-  author User @relation(fields: [authorId], references: [id])
-  authorId Int
-  location Location @relation(fields: [locationId], references: [id])
-  locationId Int
+  author User @relation(fields: [authorUserId], references: [userId])
+  authorUserId String
+  location Location @relation(fields: [locationNum], references: [locationNum])
+  locationNum String 
+  
   title String @db.VarChar(100)
   content String
   createdAt DateTime @default(now())

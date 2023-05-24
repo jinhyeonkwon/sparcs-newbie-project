@@ -19,6 +19,7 @@ import authRouter from './routes/auth.js';
 import mainRouter from './routes/main.js';
 import joinRouter from './routes/join.js';
 import loginRouter from './routes/login.js';
+import homeRouter from './routes/home.js';
 
 const app = express();
 const port = process.env.EXPRESS_PORT;
@@ -49,7 +50,7 @@ app.use(cors(corsOptions));
 
 app.use('/auth', authRouter);
 app.use('/join', joinRouter)
-app.use('/', mainRouter);
+app.use('/', homeRouter);
 app.use('/login', loginRouter);
 
 app.use((req, res, next) => { // 404

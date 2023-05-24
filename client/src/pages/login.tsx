@@ -28,8 +28,9 @@ const LoginPage = () =>{
       }
     }
     asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
+    window.location.href = `${window.location.href.replace('/login', '')}`; // 리다이렉트
     }
-
+  
   return (
     <div>
       <form style={{padding: '10px'}} onSubmit={onSubmit}>

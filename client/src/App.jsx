@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Route, Routes, Link, NavLink } from "react-router-dom";
-import { useCookies } from 'react-cookie';
+import { CookiesProvider, useCookies } from 'react-cookie';
 import HomePage from "./pages/home";
 import JoinPage from "./pages/join";
 import LoginPage from "./pages/login";
@@ -20,49 +20,62 @@ const deactiveStyle = {
 }
 
 function App() {
+  const [cookie, setCookie, removeCookie] = useCookies(['loggedinId']);
+  const [loggedinId, setLoggedinId] = useState('');
+
+  React.useEffect(() => {
+    console.log(cookie.loggedinId);
+    if (cookie.loggedinId !== undefined) {
+      setLoggedinId(cookie.loggedinId);
+    }
+  }, [])
+  
+  console.log(cookie);
   return (
-    <div>
-      <Router>
-      <nav className="navbar" role="navigation" aria-label="main navigation">
-        <div className="navber-brand">
-          <a href="https://sparcs.org" className="navbar-item">
-            <img src="/Symbol_black.png" className="navbar-brand" style={{marginRight: '10px', marginBottom: '5px'}}/>
-            <h1 className="title">Issue</h1>
-          </a>
-        </div>
-        <div className="navbar-menu">
-          <div className="navbar-item">
-            <NavLink to="/" style={({isActive}) => {
-              return isActive ? activeStyle : deactiveStyle;
-            }}>홈</NavLink>
-          </div>
-          <div className="navbar-item">
-            <NavLink to="/login" style={({isActive}) => {
-              return isActive ? activeStyle : deactiveStyle;
-            }}>로그인</NavLink>
-          </div>
-          <div className="navbar-item">
-            <NavLink to="/join" style={({isActive}) => {
-              return isActive ? activeStyle : deactiveStyle;
-            }}>회원가입</NavLink>
-          </div>
-        </div>
-        <div className='navbar-end'>
-          <div className="navbar-item">
-            <p>로그인해 주세요</p>
-          </div>
-        </div>
-      </nav>
+    <CookiesProvider>
       <div>
-      
-        <Routes>
-          <Route path="/" element={<HomePage/>}/>
-          <Route path="/join" element={<JoinPage/>}/>
-          <Route path="/login" element={<LoginPage/>}/>
-        </Routes>
+        <Router>
+        <nav className="navbar" role="navigation" aria-label="main navigation">
+          <div className="navber-brand">
+            <a href="https://sparcs.org" className="navbar-item">
+              <img src="/Symbol_black.png" className="navbar-brand" style={{marginRight: '10px', marginBottom: '5px'}}/>
+              <h1 className="title">Issue</h1>
+            </a>
+          </div>
+          <div className="navbar-menu">
+            <div className="navbar-item">
+              <NavLink to="/" style={({isActive}) => {
+                return isActive ? activeStyle : deactiveStyle;
+              }}>홈</NavLink>
+            </div>
+            <div className="navbar-item">
+              <NavLink to="/login" style={({isActive}) => {
+                return isActive ? activeStyle : deactiveStyle;
+              }}>로그인</NavLink>
+            </div>
+            <div className="navbar-item">
+              <NavLink to="/join" style={({isActive}) => {
+                return isActive ? activeStyle : deactiveStyle;
+              }}>회원가입</NavLink>
+            </div>
+          </div>
+          <div className='navbar-end'>
+            <div className="navbar-item">
+              <img src="public/Sample_User_Icon.png"></img><p style={{marginRight: '10px', marginLeft: '10px', color: 'black'}}>{(loggedinId !== undefined) ? loggedinId : "로그인해 주세요"}</p>
+            </div>
+          </div>
+        </nav>
+        <div>
+        
+          <Routes>
+            <Route path="/" element={<HomePage/>}/>
+            <Route path="/join" element={<JoinPage/>}/>
+            <Route path="/login" element={<LoginPage/>}/>
+          </Routes>
+        </div>
+        </Router>
       </div>
-      </Router>
-    </div>
+    </CookiesProvider>
   )
 
   // return (
