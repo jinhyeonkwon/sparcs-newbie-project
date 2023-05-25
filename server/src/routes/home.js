@@ -41,6 +41,26 @@ router.post('/getlocnumlist', (req, res) => {
 
 })
 
+router.post('/deleteissue', async (req, res) => {
+  try {
+    // 짜야 함!
+    const deleteIssueId = req.body.deleteIssueId;
+    const deleteIssue = await prisma.issue.delete({
+      where: {
+        id: deleteIssueId,
+      }
+    });
+    console.log(deleteIssue);
+    return res.status(200).json({isOk: true});
+  }
+  catch (e) {
+    console.log(e);
+    return res.status(500).json({ error: e });
+  }
+  
+
+})
+
 
 
 

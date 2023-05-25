@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
 import { SAPIBase } from '../tools/api';
@@ -21,6 +21,9 @@ const HomePage = () => {
   const [locFilter, setLocFilter] = useState({locFilter:'N10', locName:'교양분관'});
   const [isDropdownActive, setIsDropdownActive] = useState(false);
   const [issueList, setIssueList] = useState([]);
+  const [editIssueId, setEditIssueId] = useState(0);
+  const [editOrDeleteCount, setEditOrDeleteCount] = useState(0); // 리렌더링을 위해
+
   const locMap = new Map();
   locMap.set('N19', '아름관');
   locMap.set('N16', '소망관');
@@ -54,6 +57,9 @@ const HomePage = () => {
   locMap.set('W2', '서측 학생회관');
   locMap.set('E5', '교직원회관');
 
+  
+  const locNumList = ['N19', 'N16', 'N14', 'N17', 'N18', 'N20', 'N21', 'W6', '']
+  
 
 
   const getIssues = (event) => {
@@ -71,7 +77,7 @@ const HomePage = () => {
     }
     asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
   }
-
+  
   const setFilter = (locNum) => {
     setLocFilter({locFilter:locNum, locName:locMap.get(locNum)});
     console.log(`setFilter(${locNum})`);
@@ -85,8 +91,23 @@ const HomePage = () => {
     }
     console.log("toggled");
   }
-  
-  const cardList = issueList.map((issue) => (
+
+  const deleteIssue = (event, deleteIssueId) => {
+    event.preventDefault();
+    alert(`delete 눌림 : ${deleteIssueId}`);
+    const asyncFun = async () => {
+      const response = await axios.post(SAPIBase + '/deleteissue', {deleteIssueId: deleteIssueId});
+      if (response.status === 200) {
+        alert("issue 지우기 성공!");
+      } else {
+        alert("issue 지우기 실패!");
+      }
+      setEditOrDeleteCount(editOrDeleteCount + 1);
+    }
+    asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
+  }
+
+  const issueCard = (issue) => {
     <div className="card" style={{marginTop:'5px', marginBottom:'5px'}}>
       <header className="card-header">
         <p className="card-header-title">
@@ -109,7 +130,51 @@ const HomePage = () => {
         </footer>
       </div>
     </div>
-  ))
+  }
+  
+  const cardList = issueList.map((issue) => (
+    <div className="card" style={{marginTop:'5px', marginBottom:'5px'}}>
+      <header className="card-header">
+        <p className="card-header-title">
+          {issue.title}
+        </p>
+      </header>
+      <div className="card-content">
+        <div className="content">
+          작성자 : {issue.authorUserId}
+          <hr></hr>
+          {issue.content}
+        </div>
+        <hr/>
+        <div className="content">
+          
+        </div>
+        <footer className="card-footer">
+          <button style={{marginLeft:'5px', marginRight:'5px'}} className="button card-footer-item">Edit</button>
+          <button style={{marginLeft:'5px', marginRight:'5px'}} className="button card-footer-item" onClick={(event) => deleteIssue(event, issue.id)}>Delete</button>
+        </footer>
+      </div>
+    </div>
+  ));
+  
+  const dropdownList = Array.from( locMap.keys() ).map((locNum) => {
+    <button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter('N10')}>
+      {`${locNum} ${locMap.get(locNum)}`}
+    </button>
+  });
+  
+  useEffect(() => { // 지우거나 edit하면 새로 리스트 가져와서 리렌더링 하세요
+    const asyncFun = async () => {
+      const response = await axios.post(SAPIBase + '/getissuelist', {locFilter: {locationNum: locFilter.locFilter}});
+      if (response.status === 200) {
+        console.log(response.data.issueList);
+        setIssueList(response.data.issueList); // 이것까지는 제대로 들어옴
+        console.log(`issueList : ${issueList}`); 
+      } else {
+      }
+    }
+    asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
+  }, [editOrDeleteCount]);
 
   // const asyncFun = async () => {
   //   const response = await axios.post(SAPIBase + '/home/getlocnumlist');
@@ -123,7 +188,7 @@ const HomePage = () => {
       
   //   }
   // }, [locFilter])
-
+  console.log(issueList);
   return (
     <div className="columns">
       <div className="column" style={{margin: '10px', padding: '10px'}}>
@@ -134,7 +199,7 @@ const HomePage = () => {
         <div className="dropdown is-hoverable">
           <div className="dropdown-trigger">
             <button className="button" aria-haspopup="true" aria-controls="dropdown-menu3" onClick={toggleIsDropdownActive}>
-              <span>건물 선택</span>
+              <span>{`${locFilter.locFilter} ${locMap.get(locFilter.locFilter)}`}</span>
               <span className="icon is-small">
                 <i className="fas fa-angle-down" aria-hidden="true"></i>
               </span>
@@ -144,17 +209,33 @@ const HomePage = () => {
             {/* 안에 콘텐츠들 : 나중에 DB에서 모든 장소의 locationNum 끌어와서 자동화할 수 있으면 좋을 듯 */}
 
             <div className="dropdown-content">
-              <button className="dropdown-item" onClick={() => setFilter('N10')}>
-                N10 교양분관
+              <button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter('N10')}>
+                {`N10 ${locMap.get('N10')}`}
               </button>
-              <button className="dropdown-item" onClick={() => setFilter('N14')}>
-                N14 사랑관
+              <button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter('N14')}>
+                {`N14 ${locMap.get('N14')}`}
               </button>
             </div>
 
           </div>
         </div>
-        <button type="button" className="button" onClick={getIssues}>리스트 가져와</button>
+        <button type="button" className="button" onClick={getIssues}>리스트 가져오기</button>
+
+        <div className="card" style={{marginTop:'5px', marginBottom:'5px'}}>
+          <form>
+            <header className="card-header">
+              <p className='card-header-title'>issue 추가하기 : {`${locFilter.locFilter} ${locMap.get(locFilter.locFilter)}`}</p>
+            </header>
+            <span>
+              <input className='input' placeholder='issue 제목'></input>
+            </span>
+            <span>
+              <textarea className="textarea has-fixed-size" placeholder="issue 내용"></textarea>
+            </span>
+          </form>
+          <button className='button is-primary' style={{margin: '10px'}}>issue 추가</button>
+        </div>
+
         <div>
           {cardList}
         </div>
