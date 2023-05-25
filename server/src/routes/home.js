@@ -43,7 +43,6 @@ router.post('/getlocnumlist', (req, res) => {
 
 router.post('/deleteissue', async (req, res) => {
   try {
-    // 짜야 함!
     const deleteIssueId = req.body.deleteIssueId;
     const deleteIssue = await prisma.issue.delete({
       where: {
@@ -51,6 +50,32 @@ router.post('/deleteissue', async (req, res) => {
       }
     });
     console.log(deleteIssue);
+    return res.status(200).json({isOk: true});
+  }
+  catch (e) {
+    console.log(e);
+    return res.status(500).json({ error: e });
+  }
+  
+
+})
+
+router.post('/createissue', async (req, res) => {
+  console.log(req.body);
+  try {
+    const {title, content, locationNum, startTime, endTime, authorUserId } = req.body;
+    const newIssue = {
+      title: title,
+      content: content,
+      locationNum: locationNum,
+      startTime: new Date(startTime).toISOString(),
+      endTime: new Date(endTime).toISOString(),
+      authorUserId: authorUserId
+    }
+    const createIssue = await prisma.issue.create({
+      data: newIssue,
+    });
+    console.log(createIssue);
     return res.status(200).json({isOk: true});
   }
   catch (e) {
