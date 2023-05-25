@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
 import { SAPIBase } from '../tools/api';
+import { CookiesProvider, useCookies } from 'react-cookie';
+import parse from 'postgres-date';
 
 import '../css/mystyles.css';
 
@@ -22,7 +24,27 @@ const HomePage = () => {
   const [isDropdownActive, setIsDropdownActive] = useState(false);
   const [issueList, setIssueList] = useState([]);
   const [editIssueId, setEditIssueId] = useState(0);
-  const [editOrDeleteCount, setEditOrDeleteCount] = useState(0); // 리렌더링을 위해
+  const [CUDCount, setCUDCount] = useState(0); // 리렌더링을 위해
+  const [newIssueTitle, setnewIssueTitle] = useState('');
+  const [newIssueStartTime, setNewIssueStartTime] = useState(null);
+  const [newIssueEndTime, setNewIssueEndTime] = useState(null);
+  const [newIssueContent, setNewIssueContent] = useState('');
+  const [createModalClass, setCreateModalClass] = useState("modal");
+  const [createFailModalClass, setCreateFailModalClass] = useState("modal");
+  const [deleteModalClass, setDeleteModalClass] = useState("modal");
+  const [deleteFailModalClass, setDeleteFailModalClass] = useState("modal");
+
+  // 아이디 쿠키 ------
+  const [cookie, setCookie, removeCookie] = useCookies(['loggedinId', 'roleId']);
+  const [loggedinId, setLoggedinId] = useState('');
+
+  React.useEffect(() => {
+    console.log(cookie.loggedinId);
+    if (cookie.loggedinId !== undefined) {
+      setLoggedinId(cookie.loggedinId);
+    }
+  }, [])
+  // -----------------
 
   const locMap = new Map();
   locMap.set('N19', '아름관');
@@ -58,9 +80,24 @@ const HomePage = () => {
   locMap.set('E5', '교직원회관');
 
   
-  const locNumList = ['N19', 'N16', 'N14', 'N17', 'N18', 'N20', 'N21', 'W6', '']
+  const locNumList = ['N19', 'N16', 'N14', 'N17', 'N18', 'N20', 'N21', 'W6', 'W4-4', 'W4-3', ];
   
-
+  const closeCreateModal = (event) => {
+    event.preventDefault();
+    setCreateModalClass('modal');
+  }
+  const closeCreateFailModal = (event) => {
+    event.preventDefault();
+    setCreateFailModalClass('modal');
+  }
+  const closeDeleteModal = (event) => {
+    event.preventDefault();
+    setDeleteModalClass('modal');
+  }
+  const closeDeleteFailModal = (event) => {
+    event.preventDefault();
+    setDeleteFailModalClass('modal');
+  }
 
   const getIssues = (event) => {
     event.preventDefault();
@@ -94,17 +131,17 @@ const HomePage = () => {
 
   const deleteIssue = (event, deleteIssueId) => {
     event.preventDefault();
-    alert(`delete 눌림 : ${deleteIssueId}`);
+    //alert(`delete 눌림 : ${deleteIssueId}`);
     const asyncFun = async () => {
       const response = await axios.post(SAPIBase + '/deleteissue', {deleteIssueId: deleteIssueId});
       if (response.status === 200) {
-        alert("issue 지우기 성공!");
+        setDeleteModalClass('modal is-active');
       } else {
-        alert("issue 지우기 실패!");
+        setDeleteFailModalClass('modal is-active');
       }
-      setEditOrDeleteCount(editOrDeleteCount + 1);
+      setCUDCount(CUDCount + 1);
     }
-    asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
+    asyncFun().catch((e) => setDeleteFailModalClass('modal is-active'));
   }
 
   const issueCard = (issue) => {
@@ -141,7 +178,10 @@ const HomePage = () => {
       </header>
       <div className="card-content">
         <div className="content">
-          작성자 : {issue.authorUserId}
+          <p>작성자 : {issue.authorUserId}</p>
+          <p style={issue.startTime === '1970-01-01T00:00:00.000Z' ? {display: 'none'} : {} } >시작 시각 : {new Date(issue.startTime).toLocaleString()}</p>
+          {/* postgres 시간을 js 형식으로 바꿔야 함. 지금은 1970년으로 뜸 */}
+          <p style={issue.endTime === '1970-01-01T00:00:00.000Z' ? {display: 'none'} : {} } >종료 시각 : {new Date(issue.endTime).toLocaleString()}</p>
           <hr></hr>
           {issue.content}
         </div>
@@ -151,19 +191,21 @@ const HomePage = () => {
         </div>
         <footer className="card-footer">
           <button style={{marginLeft:'5px', marginRight:'5px'}} className="button card-footer-item">Edit</button>
-          <button style={{marginLeft:'5px', marginRight:'5px'}} className="button card-footer-item" onClick={(event) => deleteIssue(event, issue.id)}>Delete</button>
+          <button style={(loggedinId === issue.authorUserId) ? {marginLeft:'5px', marginRight:'5px'} : {marginLeft:'5px', marginRight:'5px', display: 'none'}} className="button card-footer-item" onClick={(event) => deleteIssue(event, issue.id)}>Delete</button>
         </footer>
       </div>
     </div>
   ));
   
-  const dropdownList = Array.from( locMap.keys() ).map((locNum) => {
+  const locNameList = Array.from( locMap.keys() )
+  const dropdownList = locNameList.map((locName) => {
     <button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter('N10')}>
-      {`${locNum} ${locMap.get(locNum)}`}
+      {`${locName} ${locMap.get(locName)}`}
     </button>
   });
+  //console.log(Array.from( locMap.keys() ));
   
-  useEffect(() => { // 지우거나 edit하면 새로 리스트 가져와서 리렌더링 하세요
+  useEffect(() => { // 지우거나 edit하면 새로 리스트 가져와서 리렌더링 하세요 (효율성은 안좋은 듯)
     const asyncFun = async () => {
       const response = await axios.post(SAPIBase + '/getissuelist', {locFilter: {locationNum: locFilter.locFilter}});
       if (response.status === 200) {
@@ -174,7 +216,7 @@ const HomePage = () => {
       }
     }
     asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
-  }, [editOrDeleteCount]);
+  }, [CUDCount]);
 
   // const asyncFun = async () => {
   //   const response = await axios.post(SAPIBase + '/home/getlocnumlist');
@@ -188,59 +230,152 @@ const HomePage = () => {
       
   //   }
   // }, [locFilter])
+
+  const createIssue = (event) => {
+    event.preventDefault();
+    const asyncFun = async () => {
+      const response = await axios.post(SAPIBase + '/createissue', {
+        title: newIssueTitle, 
+        content: newIssueContent, 
+        startTime: newIssueStartTime, 
+        endTime: newIssueEndTime, 
+        locationNum: locFilter.locFilter,
+        authorUserId: loggedinId });
+      if (response.status === 200) {
+        setCUDCount(CUDCount + 1);
+        setnewIssueTitle('');
+        setNewIssueStartTime(null);
+        setNewIssueEndTime(null);
+        setNewIssueContent('');
+        setCreateModalClass('modal is-active');
+      } else {
+        setCreateFailModalClass('modal is-active');
+      }
+      
+    }
+    asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
+  }
+
   console.log(issueList);
   return (
-    <div className="columns">
-      <div className="column" style={{margin: '10px', padding: '10px'}}>
-        <img src="/transparent_kaist_map.png"></img>
-      </div>
-      <div className="column">
+    <CookiesProvider>
+      <div className="columns">
+        <div className="column" style={{margin: '10px', marginBottom: '20px', padding: '10px'}}>
+          <img src="/transparent_kaist_map.png"></img>
+        </div>
+        <div className="column">
 
-        <div className="dropdown is-hoverable">
-          <div className="dropdown-trigger">
-            <button className="button" aria-haspopup="true" aria-controls="dropdown-menu3" onClick={toggleIsDropdownActive}>
-              <span>{`${locFilter.locFilter} ${locMap.get(locFilter.locFilter)}`}</span>
-              <span className="icon is-small">
-                <i className="fas fa-angle-down" aria-hidden="true"></i>
-              </span>
-            </button>
-          </div>
-          <div className="dropdown-menu" id="dropdown-menu3" role="menu">
-            {/* 안에 콘텐츠들 : 나중에 DB에서 모든 장소의 locationNum 끌어와서 자동화할 수 있으면 좋을 듯 */}
-
-            <div className="dropdown-content">
-              <button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter('N10')}>
-                {`N10 ${locMap.get('N10')}`}
-              </button>
-              <button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter('N14')}>
-                {`N14 ${locMap.get('N14')}`}
+          <div className="dropdown is-hoverable">
+            <div className="dropdown-trigger">
+              <button className="button" aria-haspopup="true" aria-controls="dropdown-menu3" onClick={toggleIsDropdownActive}>
+                <span>{`${locFilter.locFilter} ${locMap.get(locFilter.locFilter)}`}</span>
+                <span className="icon is-small">
+                  <i className="fas fa-angle-down" aria-hidden="true"></i>
+                </span>
               </button>
             </div>
+            <div className="dropdown-menu" id="dropdown-menu3" role="menu">
+              {/* 안에 콘텐츠들 : 나중에 DB에서 모든 장소의 locationNum 끌어와서 자동화할 수 있으면 좋을 듯 */}
 
+              <div className="dropdown-content">
+                <button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter('N10')}>
+                  {`N10 ${locMap.get('N10')}`}
+                </button>
+                <button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter('N14')}>
+                  {`N14 ${locMap.get('N14')}`}
+                </button>
+              </div>
+
+            </div>
+          </div>
+          <button type="button" className="button" onClick={getIssues}>리스트 가져오기</button>
+
+          <div className="card" style={{marginTop:'5px', marginBottom:'5px'}}>
+            <form onSubmit={createIssue}>
+              <header className="card-header">
+                <p className='card-header-title'>issue 추가하기 : {`${locFilter.locFilter} ${locMap.get(locFilter.locFilter)}`}</p>
+              </header>
+              <span style={{marginBottom: '3px'}}>
+                <p className='content' style={{margin: '5px', marginBottom: '0px'}} >제목</p>
+                <input className='input'  required aria-required="true" type='text' placeholder='issue 제목' value={newIssueTitle} onChange={(e) => setnewIssueTitle(e.target.value)}></input>
+              </span>
+              <span style={{marginBottom: '3px'}}>
+                <p className='content' style={{margin: '5px', marginBottom: '0px'}}>시작 시각 (선택)</p>
+                <input className='input' type='datetime-local' value={newIssueStartTime} onChange={(e) => setNewIssueStartTime(e.target.value)} />
+              </span>
+              <span style={{marginBottom: '3px'}}>
+                <p className='content' style={{margin: '5px', marginBottom: '0px'}}>종료 시각 (선택)</p>
+                <input className='input' type='datetime-local' value={newIssueEndTime} onChange={(e) => setNewIssueEndTime(e.target.value)} />
+              </span>
+              <span style={{marginBottom: '3px'}}>
+              <p className='content' style={{margin: '5px', marginBottom: '0px'}}>설명</p>
+                <textarea className="textarea has-fixed-size"  required aria-required="true" placeholder="issue 설명" value={newIssueContent} onChange={(e) => setNewIssueContent(e.target.value)}></textarea>
+              </span>
+              <button type="submit" className='button is-primary' style={{margin: '10px'}}>issue 추가</button>
+            </form>
+          </div>
+
+
+          <div>
+            {cardList}
+          </div>
+          { /* modal */ }
+          <div className={createModalClass} id='fail-modal'>
+            <div className="modal-background"></div>
+            <div className="modal-content">
+              <div className='card'>
+                <div className='card-content'>
+                  issue가 추가되었습니다.
+                </div>
+                <footer className='modal-card-foot'>
+                  <button className="button" aria-label="close" onClick={closeCreateModal}>닫기</button>
+                </footer>
+              </div>
+            </div>
+          </div>
+          <div className={createFailModalClass} id='fail-modal'>
+            <div className="modal-background"></div>
+            <div className="modal-content">
+              <div className='card'>
+                <div className='card-content'>
+                  issue 추가에 실패했습니다.
+                </div>
+                <footer className='modal-card-foot'>
+                  <button className="button" aria-label="close" onClick={closeCreateFailModal}>닫기</button>
+                </footer>
+              </div>
+            </div>
           </div>
         </div>
-        <button type="button" className="button" onClick={getIssues}>리스트 가져오기</button>
-
-        <div className="card" style={{marginTop:'5px', marginBottom:'5px'}}>
-          <form>
-            <header className="card-header">
-              <p className='card-header-title'>issue 추가하기 : {`${locFilter.locFilter} ${locMap.get(locFilter.locFilter)}`}</p>
-            </header>
-            <span>
-              <input className='input' placeholder='issue 제목'></input>
-            </span>
-            <span>
-              <textarea className="textarea has-fixed-size" placeholder="issue 내용"></textarea>
-            </span>
-          </form>
-          <button className='button is-primary' style={{margin: '10px'}}>issue 추가</button>
+        <div className={deleteModalClass} id='fail-modal'>
+            <div className="modal-background"></div>
+            <div className="modal-content">
+              <div className='card'>
+                <div className='card-content'>
+                  issue가 삭제되었습니다.
+                </div>
+                <footer className='modal-card-foot'>
+                  <button className="button" aria-label="close" onClick={closeDeleteModal}>닫기</button>
+                </footer>
+              </div>
+            </div>
+          </div>
+          <div className={deleteFailModalClass} id='fail-modal'>
+            <div className="modal-background"></div>
+            <div className="modal-content">
+              <div className='card'>
+                <div className='card-content'>
+                  issue 삭제에 실패했습니다.
+                </div>
+                <footer className='modal-card-foot'>
+                  <button className="button" aria-label="close" onClick={closeDeleteFailModal}>닫기</button>
+                </footer>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <div>
-          {cardList}
-        </div>
-      </div>
-    </div>
+        
+    </CookiesProvider>
   )
   // return (
   // <section className="section">

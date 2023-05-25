@@ -22,14 +22,19 @@ const LoginPage = () =>{
         typedPassword: typedPassword
       }, { withCredentials: true }); // withCredentials가 있어야 쿠키 사용 가능!
       if (response.status === 200) {
-        alert("로그인 성공!");
+        setModalClass('modal');
+        window.location.href = `${window.location.href.replace('/login', '')}`; // 리다이렉트
       } else {
-        alert("로그인 실패!");
+        setModalClass('modal is-active');
       }
     }
-    asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
-    window.location.href = `${window.location.href.replace('/login', '')}`; // 리다이렉트
+    asyncFun().catch((e) => setModalClass('modal is-active'));
     }
+
+  const closeModal = (event) => {
+    event.preventDefault();
+    setModalClass('modal');
+  }
   
   return (
     <div>
@@ -52,13 +57,19 @@ const LoginPage = () =>{
           </div>
         </div>
       </form>
-      <div className={modalClass}>
-      <div className="modal-background"></div>
-      <div className="modal-content">
-        <p>modal 테스트</p>
+      <div className={modalClass} id='fail-modal'>
+        <div className="modal-background"></div>
+        <div className="modal-content">
+          <div className='card'>
+            <div className='card-content'>
+              로그인 실패! 아이디와 비밀번호를 확인하세요.
+            </div>
+            <footer className='modal-card-foot'>
+              <button className="button" aria-label="close" onClick={closeModal}>닫기</button>
+            </footer>
+          </div>
+        </div>
       </div>
-      <button className="modal-close is-large" aria-label="close"></button>
-    </div>
     </div>
   )
 };
