@@ -74,7 +74,7 @@ const HomePage = () => {
   locMap.set('E9', '학술문화관');
   locMap.set('E21', 'KAIST 클리닉');
   locMap.set('E17', '원운동장');
-  locMap.set('E0-1', '오리연못'); // 건물번호 없는 건 임의로 0-1, 0-2, ... 할 거임 
+  locMap.set('E0-1', '오리연못'); // 건물번호 없는 건 임의로 0-1, 0-2, ... 할 거임
   locMap.set('E11', '창의학습관');
   locMap.set('W2', '서측 학생회관');
   locMap.set('E5', '교직원회관');
