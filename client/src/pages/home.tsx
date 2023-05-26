@@ -19,7 +19,7 @@ interface IAPIResponse {
   content: string;
 }
 
-const HomePage = () => {
+const HomePage = (props) => {
   const [locFilter, setLocFilter] = useState({locFilter:'N10', locName:'교양분관'});
   const [isDropdownActive, setIsDropdownActive] = useState(false);
   const [issueList, setIssueList] = useState([]);
@@ -39,6 +39,10 @@ const HomePage = () => {
   const [deleteFailModalClass, setDeleteFailModalClass] = useState("modal");
   const [editModalClass, setEditModalClass] = useState("modal");
   const [editFailModalClass, setEditFailModalClass] = useState("modal");
+  const [badReqModalClass, setBadReqModalClass] = useState("modal");
+  const [badTimeModalClass, setBadTimeModalClass] = useState("modal");
+  const [timeFilter, setTimeFilter] = useState(false);
+  const roleId = props.roleId;
 
   // 아이디 쿠키 ------
   const [cookie, setCookie, removeCookie] = useCookies(['loggedinId', 'roleId']);
@@ -112,11 +116,21 @@ const HomePage = () => {
     event.preventDefault();
     setEditFailModalClass('modal');
   }
+  const closeBadReqModal = (event) => {
+    event.preventDefault();
+    setBadReqModalClass('modal');
+  }
+  const closeBadTimeModal = (event) => {
+    event.preventDefault();
+    setBadTimeModalClass('modal');
+  }
 
   const getIssues = (event) => {
     event.preventDefault();
     const asyncFun = async () => {
-      const response = await axios.post(SAPIBase + '/getissuelist', {locFilter: {locationNum: locFilter.locFilter}});
+      const response = await axios.post(SAPIBase + '/getissuelist', 
+        (timeFilter === false) ? {locFilter: {locationNum: locFilter.locFilter}} 
+        : {locFilter: {AND:[ {locationNum: locFilter.locFilter}, {OR:[{endTime: {gte: new Date()}}, {endTime: new Date(0)}]} ] }});
       if (response.status === 200) {
         alert("issue 가져오기 성공!");
         console.log(response.data.issueList);
@@ -147,7 +161,7 @@ const HomePage = () => {
     event.preventDefault();
     //alert(`delete 눌림 : ${deleteIssueId}`);
     const asyncFun = async () => {
-      const response = await axios.post(SAPIBase + '/deleteissue', {deleteIssueId: deleteIssueId, userId: loggedinId});
+      const response = await axios.post(SAPIBase + '/deleteissue', {deleteIssueId: deleteIssueId, userId: loggedinId, id: deleteIssueId});
       if (response.status === 200) {
         setDeleteModalClass('modal is-active');
       } else {
@@ -155,7 +169,13 @@ const HomePage = () => {
       }
       setCUDCount(CUDCount + 1);
     }
-    asyncFun().catch((e) => setDeleteFailModalClass('modal is-active'));
+    asyncFun().catch((e) => {
+      if (e.code === "ERR_BAD_REQUEST") {
+        setBadReqModalClass('modal is-active');
+      } else {
+        window.alert(`AN ERROR OCCURED! ${e}`)
+      }
+    });
   }
 
   const issueCard = (issue) => {
@@ -198,7 +218,7 @@ const HomePage = () => {
       if (response.status === 200) {
         console.log(response.data.issueList);
         setIssueList(response.data.issueList); // 이것까지는 제대로 들어옴
-        console.log(`issueList : ${issueList}`); 
+        //console.log(`issueList : ${issueList}`); 
       } else {
       }
     }
@@ -221,6 +241,10 @@ const HomePage = () => {
   const createIssue = (event) => {
     event.preventDefault();
     const asyncFun = async () => {
+      if (newIssueStartTime !== null && newIssueEndTime !== null && (newIssueStartTime > newIssueEndTime)) {
+        setBadTimeModalClass('modal is-active');
+        return;
+      }
       const response = await axios.post(SAPIBase + '/createissue', {
         title: newIssueTitle, 
         content: newIssueContent, 
@@ -241,7 +265,13 @@ const HomePage = () => {
         }
         
       }
-      asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
+      asyncFun().catch((e) => {
+        if (e.code === "ERR_BAD_REQUEST") {
+          setBadReqModalClass('modal is-active');
+        } else {
+          window.alert(`AN ERROR OCCURED! ${e}`)
+        }
+      });
     }
     
     const editButton = (event, id) => {
@@ -249,8 +279,12 @@ const HomePage = () => {
       setEditIssueId(id);
     }
 
-    const editIssue = ((event, id) => {
+    const editIssue = ((event, issue) => {
       event.preventDefault();
+      if (editIssueStartTime !== null && editIssueEndTime !== null && (editIssueStartTime > editIssueEndTime)) {
+        setBadTimeModalClass('modal is-active');
+        return;
+      }
       const asyncFun = async () => {
         const response = await axios.post(SAPIBase + '/editissue', {
           title: editIssueTitle, 
@@ -258,9 +292,9 @@ const HomePage = () => {
           startTime: editIssueStartTime, 
           endTime: editIssueEndTime, 
           locationNum: locFilter.locFilter,
-          authorUserId: loggedinId,
+          authorUserId: issue.authorUserId,
           userId: loggedinId,
-          id: id }); // middleware 위해 이름 맞춰서 더..
+          id: issue.id }); // middleware 위해 이름 맞춰서 더..
           if (response.status === 200) {
             setCUDCount(CUDCount + 1);
             setEditIssueId(null);
@@ -272,9 +306,16 @@ const HomePage = () => {
           } else {
             setEditFailModalClass('modal is-active');
           }
+          
         
       }
-      asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
+      asyncFun().catch((e) => {
+        if (e.code === "ERR_BAD_REQUEST") {
+          setBadReqModalClass('modal is-active');
+        } else {
+          window.alert(`AN ERROR OCCURED! ${e}`)
+        }
+      });
     });
 
     const editCancel = (event) => {
@@ -286,9 +327,17 @@ const HomePage = () => {
       setEditIssueContent('');
     }
 
+    const toggleTimeFilter = () => {
+      if (timeFilter) {
+        setTimeFilter(false);
+      } else {
+        setTimeFilter(true);
+      }
+    }
+
     const cardList = issueList.map((issue) => (
       <div className="card" style={{marginTop:'5px', marginBottom:'5px'}}>
-        <form onSubmit={(event) => editIssue(event, issue.id)}>
+        <form onSubmit={(event) => editIssue(event, issue)}>
           <header className="card-header">
             <p className="card-header-title" style={issue.id !== editIssueId ? {} : {display: 'none'}}>
               {issue.title}
@@ -316,7 +365,7 @@ const HomePage = () => {
                 <textarea className="textarea has-fixed-size"  required aria-required="true" placeholder="issue 설명 수정" value={editIssueContent} onChange={(e) => setEditIssueContent(e.target.value)}></textarea>
               </div>
             </div>
-            <footer className="card-footer" style={(loggedinId === issue.authorUserId) ? {} : {display: 'none'}}>
+            <footer className="card-footer" style={((loggedinId === issue.authorUserId) && (roleId !== 2)) || (roleId === 3) ? {} : {display: 'none'}}>
               <button style={(issue.id === editIssueId) ? {marginTop: '7px', marginLeft:'5px', marginRight:'5px', display: 'none'} : {marginTop: '7px', marginLeft:'5px', marginRight:'5px'}} className="button" onClick={(event) => editButton(event, issue.id)}>수정</button>
               <button type="submit" style={(issue.id !== editIssueId) ? {marginTop: '7px', marginLeft:'5px', marginRight:'5px', display: 'none'} : {marginTop: '7px', marginLeft:'5px', marginRight:'5px'}} className="button is-primary">수정하기!</button>
               <button style={(issue.id === editIssueId) ? {marginTop: '7px', marginLeft:'5px', marginRight:'5px', display: 'none'} : {marginTop: '7px', marginLeft:'5px', marginRight:'5px'}} className="button" onClick={(event) => deleteIssue(event, issue.id)}>삭제</button>
@@ -327,9 +376,10 @@ const HomePage = () => {
       </div>
     ));
     
-    console.log(issueList);
+    //console.log(issueList);
   return (
     <CookiesProvider>
+      <h2 className='message' style={roleId === 2 ? {textAlign:'center', color:'red', fontWeight:'bold'} : {display: 'none'}}>정지된 사용자입니다! issue 추가, 수정, 삭제가 불가능합니다.</h2>
       <div className="columns">
         <div className="column" style={{margin: '10px', marginBottom: '20px', padding: '10px'}}>
           <img src="/transparent_kaist_map.png"></img>
@@ -360,8 +410,13 @@ const HomePage = () => {
             </div>
           </div>
           <button type="button" className="button" onClick={getIssues}>리스트 가져오기</button>
+          &nbsp;&nbsp;
+          <span>
+            <input type="checkbox" className="is-large" onClick = {toggleTimeFilter}/>
+            &nbsp;&nbsp;종료 시각이 과거인 issue 제외하기
+          </span>
 
-          <div className="card" style={{marginTop:'5px', marginBottom:'5px'}}>
+          <div className="card" style={roleId === 1 || roleId === 3 ? {marginTop:'5px', marginBottom:'5px'} : {marginTop:'5px', marginBottom:'5px', display: 'none'}}>
             <form onSubmit={createIssue}>
               <header className="card-header">
                 <p className='card-header-title'>issue 추가하기 : {`${locFilter.locFilter} ${locMap.get(locFilter.locFilter)}`}</p>
@@ -463,10 +518,36 @@ const HomePage = () => {
             <div className="modal-content">
               <div className='card'>
                 <div className='card-content'>
-                  issue 수정ㄴ에 실패했습니다.
+                  issue 수정에 실패했습니다.
                 </div>
                 <footer className='modal-card-foot'>
                   <button className="button" aria-label="close" onClick={closeEditFailModal}>닫기</button>
+                </footer>
+              </div>
+            </div>
+          </div>
+          <div className={badReqModalClass} id='fail-modal'>
+            <div className="modal-background"></div>
+            <div className="modal-content">
+              <div className='card'>
+                <div className='card-content'>
+                  잘못된 요청입니다.
+                </div>
+                <footer className='modal-card-foot'>
+                  <button className="button" aria-label="close" onClick={closeBadReqModal}>닫기</button>
+                </footer>
+              </div>
+            </div>
+          </div>
+          <div className={badTimeModalClass} id='fail-modal'>
+            <div className="modal-background"></div>
+            <div className="modal-content">
+              <div className='card'>
+                <div className='card-content'>
+                  시작 시각이 종료 시각보다 뒤입니다.
+                </div>
+                <footer className='modal-card-foot'>
+                  <button className="button" aria-label="close" onClick={closeBadTimeModal}>닫기</button>
                 </footer>
               </div>
             </div>

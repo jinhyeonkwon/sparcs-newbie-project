@@ -30,7 +30,7 @@ function App() {
   const asyncRoleCheck = async () => {
     const response = await axios.post(SAPIBase + `/getroleid?userId=${loggedinId}`);
     if (response.status === 200) {
-      alert(`roleId 확인 성공! : ${response.data.roleId}`);
+      //alert(`roleId 확인 성공! : ${response.data.roleId}`);
       setRoleId(response.data.roleId);
     } else {
       alert("roleId 확인 실패!");
@@ -47,7 +47,7 @@ function App() {
 
   React.useEffect(() => {
     if ((loggedinId !== null) && (loggedinId !== undefined)) {
-      alert('roleId를 확인해야 함.');
+      //alert('roleId를 확인해야 함.');
       asyncRoleCheck().catch((e) => window.alert(`roleId 확인 중에 망함! ${e}`));
     }
   }, [loggedinId]);
@@ -93,8 +93,8 @@ function App() {
           </div>
           <div className='navbar-end'>
             <div className="navbar-item">
-              <img src="public/Sample_User_Icon.png"></img>
-              <p style={{marginRight: '10px', marginLeft: '10px', color: 'black'}}>{(loggedinId !== undefined) && (loggedinId !== null) ? loggedinId : "로그인해 주세요"}</p>
+              <img src={roleId === 3 ? "public/Crown.png" : "public/Sample_User_Icon.png"}></img>
+              <p style={(roleId === 2) ? {marginRight: '10px', marginLeft: '10px', color: 'red'} : (roleId === 3 ? {marginRight: '10px', marginLeft: '10px', color: 'green'} : {marginRight: '10px', marginLeft: '10px', color: 'black'})}>{(loggedinId !== undefined) && (loggedinId !== null) ? loggedinId : "로그인해 주세요"}</p>
               <button className="button" style={(loggedinId === undefined) || (loggedinId === null) ? {display: 'none'} : {}} onClick={logout}>로그아웃</button>
             </div>
           </div>
@@ -102,7 +102,7 @@ function App() {
         <div>
         
           <Routes>
-            <Route path="/" element={<HomePage/>}/>
+            <Route path="/" element={<HomePage roleId={roleId}/>}/>
             <Route path="/join" element={<JoinPage/>}/>
             <Route path="/login" element={<LoginPage/>}/>
           </Routes>

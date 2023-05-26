@@ -1,25 +1,33 @@
 import express from "express";
 import { PrismaClient, Prisma } from '@prisma/client';
-import authMiddleware from '../middleware/auth';
 
 const prisma = new PrismaClient();
 
-// 정상 유저로 로그인했는가?
+// 본인이거나 관리자인가?
 const authMiddleware = async (req, res, next) => { // 현재는 쿠키에 아이디를 넣고 있어서, 그 아이디로 유저 객체만 db에서 뽑아오면 끝.
-  const reqId = req.body.loggedinId;
+  const { userId, id } = req.body;
   const user = await prisma.user.findUnique({
     where: {
-      userId: reqId,
+      userId: userId,
+    }
+  });
+  const issue = await prisma.issue.findUnique({
+    where: {
+      id: id
     }
   })
+  // console.log(req.body.userId);
+  // console.log(req.body.id);
+  // console.log(user.userId);
+  // console.log(user.roleId);
 
-  if (user === null) {
-    console.log('[AUTH-MIDDLEWARE] Not Authorized User');
-    res.status(401).json({ error: 'Not Authorized' });
-  } else {
+  if ((user.roleId === 3) || (user.userId === issue.authorUserId) ) {
     console.log()
     next();
+  } else {
+    console.log('[AUTH-MIDDLEWARE] Not Authorized User');
+    res.status(401).json({ error: 'Not Authorized' });
   }
 }
 
-module.exports = authMiddleware;
+export default authMiddleware;
