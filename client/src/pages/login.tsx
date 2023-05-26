@@ -65,7 +65,7 @@ const LoginPage = () =>{
               로그인 실패! 아이디와 비밀번호를 확인하세요.
             </div>
             <footer className='modal-card-foot'>
-              <button className="button" aria-label="close" onClick={closeModal}>닫기</button>
+              <button className="button" aria-label="close" onClick={closeModal}>닫기</button> 
             </footer>
           </div>
         </div>

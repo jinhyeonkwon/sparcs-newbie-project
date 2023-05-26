@@ -543,7 +543,7 @@ const HomePage = (props) => {
                   시작 시각이 종료 시각보다 뒤입니다.
                 </div>
                 <footer className='modal-card-foot'>
-                  <button className="button" aria-label="close" onClick={closeBadTimeModal}>닫기</button>
+                  <button className="button" aria-label="close" onClick={closeBadTimeModal}>닫기</button> 
                 </footer>
               </div>
             </div>
