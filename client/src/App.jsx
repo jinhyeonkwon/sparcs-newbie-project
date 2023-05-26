@@ -68,27 +68,29 @@ function App() {
       <div>
         <Router>
         <nav className="navbar" role="navigation" aria-label="main navigation">
-          <div className="navber-brand">
-            <a href="https://sparcs.org" className="navbar-item">
-              <img src="/Symbol_black.png" className="navbar-brand" style={{marginRight: '10px', marginBottom: '5px'}}/>
-              <h1 className="title">Issue</h1>
-            </a>
-          </div>
-          <div className="navbar-menu">
-            <div className="navbar-item">
-              <NavLink to="/" style={({isActive}) => {
-                return isActive ? activeStyle : deactiveStyle;
-              }}>홈</NavLink>
+          <div className="navbar-start">
+            <div className="navber-brand">
+              <a href="https://sparcs.org" className="navbar-item">
+                <img src="/Symbol_black.png" className="navbar-brand" style={{marginRight: '10px', marginBottom: '5px'}}/>
+                <h1 className="title">Issue</h1>
+              </a>
             </div>
-            <div className="navbar-item">
-              <NavLink to="/login" style={({isActive}) => {
-                return isActive ? activeStyle : deactiveStyle;
-              }}>로그인</NavLink>
-            </div>
-            <div className="navbar-item">
-              <NavLink to="/join" style={({isActive}) => {
-                return isActive ? activeStyle : deactiveStyle;
-              }}>회원가입</NavLink>
+            <div className="navbar-menu is-active">
+              <div className="navbar-item">
+                <NavLink to="/" style={({isActive}) => {
+                  return isActive ? activeStyle : deactiveStyle;
+                }}>홈</NavLink>
+              </div>
+              <div className="navbar-item">
+                <NavLink to="/login" style={({isActive}) => {
+                  return isActive ? activeStyle : deactiveStyle;
+                }}>로그인</NavLink>
+              </div>
+              <div className="navbar-item">
+                <NavLink to="/join" style={({isActive}) => {
+                  return isActive ? activeStyle : deactiveStyle;
+                }}>회원가입</NavLink>
+              </div>
             </div>
           </div>
           <div className='navbar-end'>
