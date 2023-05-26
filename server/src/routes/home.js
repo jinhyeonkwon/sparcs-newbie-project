@@ -143,6 +143,27 @@ router.post('/getroleid', async (req, res) => {
   }
 })
 
+router.post('/getusername', async (req, res) => {
+  //console.log('roleid 확인 진입');
+  try {
+    const userId = req.query.userId;
+    //console.log(`userId : ${userId}`);
+    const thatUser = await prisma.user.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+    if (thatUser === null) {
+      return res.status(200).json({userName: null});
+    } else {
+      return res.status(200).json({userName: thatUser.userName});
+    }
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ error: `isexists 오류` });
+  }
+})
+
 
 
 
