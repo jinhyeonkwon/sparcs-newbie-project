@@ -1,5 +1,13 @@
 import { PrismaClient } from '@prisma/client'
 import process from 'process'
+import dotenv from 'dotenv'
+
+if (process.env.ENVIRONMENT === "DEVELOPMENT") {
+	dotenv.config({ path: ".env.development" })
+} else {
+	dotenv.config({ path: ".env.production" })
+}
+
 const prisma = new PrismaClient()
 async function main() {
   const role1 = await prisma.role.upsert({
@@ -27,12 +35,12 @@ async function main() {
     },
   })
   const admin = await prisma.user.upsert({
-    where: { userId: 'daystar' },
+    where: { userId: process.env.ADMIN_ID },
     update: {},
     create: {
-      userId: 'daystar',
-      userName: '권진현',
-      password: 'kjh',
+      userId: process.env.ADMIN_ID,
+      userName: process.env.ADMIN_NAME,
+      password: process.env.ADMIN_PW,
       roleId: 3,
     },
   })

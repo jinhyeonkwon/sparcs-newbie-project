@@ -95,7 +95,7 @@ function App() {
           </div>
           <div className='navbar-end'>
             <div className="navbar-item">
-              <img src={roleId === 3 ? "public/Crown.png" : "public/Sample_User_Icon.png"}></img>
+              <img src={roleId === 3 ? "/Crown.png" : "/Sample_User_Icon.png"}></img>
               <p style={(roleId === 2) ? {marginRight: '10px', marginLeft: '10px', color: 'red'} : (roleId === 3 ? {marginRight: '10px', marginLeft: '10px', color: 'green'} : {marginRight: '10px', marginLeft: '10px', color: 'black'})}>{(loggedinId !== undefined) && (loggedinId !== null) ? loggedinId : "로그인해 주세요"}</p>
               <button className="button" style={(loggedinId === undefined) || (loggedinId === null) ? {display: 'none'} : {}} onClick={logout}>로그아웃</button>
             </div>
@@ -111,6 +111,13 @@ function App() {
         </div>
         </Router>
       </div>
+      <footer class="footer">
+        <div class="content has-text-centered">
+          <p>
+            <strong>Issue</strong> by <a href="https://github.com/jinhyeonkwon">Jinhyeon Kwon</a>
+          </p>
+        </div>
+      </footer>
     </CookiesProvider>
   )
 

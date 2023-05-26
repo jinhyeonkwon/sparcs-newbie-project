@@ -206,9 +206,9 @@ const HomePage = (props) => {
   
   const locNameList = Array.from( locMap.keys() )
   const dropdownList = locNameList.map((locName) => {
-    <button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter('N10')}>
+    return (<button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter(locName)}>
       {`${locName} ${locMap.get(locName)}`}
-    </button>
+    </button>)
   });
   //console.log(Array.from( locMap.keys() ));
   
@@ -396,22 +396,18 @@ const HomePage = (props) => {
               </button>
             </div>
             <div className="dropdown-menu" id="dropdown-menu3" role="menu">
-              {/* 안에 콘텐츠들 : 나중에 DB에서 모든 장소의 locationNum 끌어와서 자동화할 수 있으면 좋을 듯 */}
+              {/* 안에 콘텐츠들 : 나중에 DB에서 모든 장소의 locationNum 끌어와서 자동화할 수 있으면 좋을 듯 // map 함수 쓸랬는데 실패ㅠㅠ */}
 
               <div className="dropdown-content">
-                <button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter('N10')}>
-                  {`N10 ${locMap.get('N10')}`}
-                </button>
-                <button className="dropdown-item button is-ghost" style={{color: 'black'}} onClick={() => setFilter('N14')}>
-                  {`N14 ${locMap.get('N14')}`}
-                </button>
+                {dropdownList}
               </div>
 
             </div>
           </div>
           <button type="button" className="button" onClick={getIssues}>리스트 가져오기</button>
-          &nbsp;&nbsp;
+          <br/>
           <span>
+            &nbsp;&nbsp;
             <input type="checkbox" className="is-large" onClick = {toggleTimeFilter}/>
             &nbsp;&nbsp;종료 시각이 과거인 issue 제외하기
           </span>

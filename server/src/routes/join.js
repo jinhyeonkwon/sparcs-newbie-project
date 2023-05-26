@@ -23,7 +23,7 @@ router.post('/isexists', async (req, res) => {
     }
   } catch (e) {
     console.log(e);
-    return res.status(500).json({ error: `isexists 오류` });
+    return res.status(400).json({ error: `isexists 오류` });
   }
 })
 
@@ -57,7 +57,7 @@ router.post('/adduser', async (req, res) => { // 한번 해봤는데
     return res.status(200).json({isOK:true});
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ error: `adduser 오류` });
+    return res.status(400).json({ error: `adduser 오류` });
   }
 })
 // role이 비어 있으면 foreign key 문제로 못 넣음! -> pgAdmin에서나 쉘에서 직접 insert 문으로 넣어줘야 함.

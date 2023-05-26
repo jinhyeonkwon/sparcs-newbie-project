@@ -18,6 +18,22 @@ const JoinPage = () =>{
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [idExists, setIdExists] = useState(false);
+  const [joinModalClass, setJoinModalClass] = useState("modal");
+  const [joinFailModalClass, setJoinFailModalClass] = useState("modal");
+  const [badReqModalClass, setBadReqModalClass] = useState("modal");
+
+  const closeJoinModal = (event) => {
+    event.preventDefault();
+    setJoinModalClass('modal');
+  }
+  const closeJoinFailModal = (event) => {
+    event.preventDefault();
+    setJoinFailModalClass('modal');
+  }
+  const closeBadReqModal = (event) => {
+    event.preventDefault();
+    setBadReqModalClass('modal');
+  }
   
   // React.useEffect(() => {
   //   console.log("useEffect 불림");
@@ -61,13 +77,19 @@ const JoinPage = () =>{
         password: password
       });
       if (response.status === 200) {
-        alert("회원가입 성공!");
+        setJoinModalClass("modal is-active");
       } else {
-        alert("DB 저장 실패!");
+        setJoinFailModalClass("modal is-active");
       }
     }
     asyncCheck();
-    asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
+    asyncFun().catch((e) => {
+      if (e.code === "ERR_BAD_REQUEST") {
+        setBadReqModalClass('modal is-active');
+      } else {
+        window.alert(`AN ERROR OCCURED! ${e}`)
+      }
+    });
   }
 
   return (
@@ -101,6 +123,47 @@ const JoinPage = () =>{
           </div>
         </div>
       </form>
+
+      {/* modal */}
+      <div className={joinModalClass} id='fail-modal'>
+        <div className="modal-background"></div>
+        <div className="modal-content">
+          <div className='card'>
+            <div className='card-content'>
+              회원가입에 성공했습니다.
+            </div>
+            <footer className='modal-card-foot'>
+              <button className="button" aria-label="close" onClick={closeJoinModal}>닫기</button>
+            </footer>
+          </div>
+        </div>
+      </div>
+      <div className={joinFailModalClass} id='fail-modal'>
+        <div className="modal-background"></div>
+        <div className="modal-content">
+          <div className='card'>
+            <div className='card-content'>
+              회원가입에 실패했습니다.
+            </div>
+            <footer className='modal-card-foot'>
+              <button className="button" aria-label="close" onClick={closeJoinFailModal}>닫기</button>
+            </footer>
+          </div>
+        </div>
+      </div>
+      <div className={badReqModalClass} id='fail-modal'>
+        <div className="modal-background"></div>
+        <div className="modal-content">
+          <div className='card'>
+            <div className='card-content'>
+              잘못된 요청입니다.
+            </div>
+            <footer className='modal-card-foot'>
+              <button className="button" aria-label="close" onClick={closeBadReqModal}>닫기</button>
+            </footer>
+          </div>
+        </div>
+      </div>
     </div>
   )
 };
