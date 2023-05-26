@@ -100,7 +100,7 @@ const JoinPage = () =>{
           <label className='label'>아이디</label>
           <button type="button" className="button" style={{marginBottom: '5px'}} onClick={idCheckAndColor}>아이디 중복 확인</button>
           <div className='control'>
-            <input className={idExists ? 'input is-danger' : 'input is-success'} onChange={(e) => setUserId(e.target.value)} value={userId} type="text" pattern="^[a-zA-Z0-9]+$" maxLength={15} required placeholder='15글자 이하의 알파벳/숫자' />
+            <input className={idExists ? 'input is-danger' : 'input is-success'} onChange={(e) => setUserId(e.target.value)} value={userId} type="text" pattern="^[a-zA-Z0-9]+$" maxLength={15} required placeholder='15글자 이하의 알파벳/숫자' /> 
           </div>
           <p className='help is-danger' style={idExists ? {} : {display:'none'}}>아이디가 중복됩니다.</p>
           <p className='help is-success' style={!idExists ? {} : {display:'none'}}>사용 가능한 아이디입니다.</p>
