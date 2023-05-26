@@ -2,6 +2,30 @@ import { PrismaClient } from '@prisma/client'
 import process from 'process'
 const prisma = new PrismaClient()
 async function main() {
+  const role1 = await prisma.role.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      id: 1,
+      roleName: 'regularUser',
+    },
+  })
+  const role2 = await prisma.role.upsert({
+    where: { id: 2 },
+    update: {},
+    create: {
+      id: 2,
+      roleName: 'bannedUser',
+    },
+  })
+  const role3 = await prisma.role.upsert({
+    where: { id: 3 },
+    update: {},
+    create: {
+      id: 3,
+      roleName: 'admin',
+    },
+  })
   const admin = await prisma.user.upsert({
     where: { userId: 'daystar' },
     update: {},
