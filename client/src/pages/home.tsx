@@ -25,14 +25,20 @@ const HomePage = () => {
   const [issueList, setIssueList] = useState([]);
   const [editIssueId, setEditIssueId] = useState(0);
   const [CUDCount, setCUDCount] = useState(0); // 리렌더링을 위해
-  const [newIssueTitle, setnewIssueTitle] = useState('');
+  const [newIssueTitle, setNewIssueTitle] = useState('');
   const [newIssueStartTime, setNewIssueStartTime] = useState(null);
   const [newIssueEndTime, setNewIssueEndTime] = useState(null);
   const [newIssueContent, setNewIssueContent] = useState('');
+  const [editIssueTitle, setEditIssueTitle] = useState('');
+  const [editIssueStartTime, setEditIssueStartTime] = useState(null);
+  const [editIssueEndTime, setEditIssueEndTime] = useState(null);
+  const [editIssueContent, setEditIssueContent] = useState('');
   const [createModalClass, setCreateModalClass] = useState("modal");
   const [createFailModalClass, setCreateFailModalClass] = useState("modal");
   const [deleteModalClass, setDeleteModalClass] = useState("modal");
   const [deleteFailModalClass, setDeleteFailModalClass] = useState("modal");
+  const [editModalClass, setEditModalClass] = useState("modal");
+  const [editFailModalClass, setEditFailModalClass] = useState("modal");
 
   // 아이디 쿠키 ------
   const [cookie, setCookie, removeCookie] = useCookies(['loggedinId', 'roleId']);
@@ -98,6 +104,14 @@ const HomePage = () => {
     event.preventDefault();
     setDeleteFailModalClass('modal');
   }
+  const closeEditModal = (event) => {
+    event.preventDefault();
+    setEditModalClass('modal');
+  }
+  const closeEditFailModal = (event) => {
+    event.preventDefault();
+    setEditFailModalClass('modal');
+  }
 
   const getIssues = (event) => {
     event.preventDefault();
@@ -133,7 +147,7 @@ const HomePage = () => {
     event.preventDefault();
     //alert(`delete 눌림 : ${deleteIssueId}`);
     const asyncFun = async () => {
-      const response = await axios.post(SAPIBase + '/deleteissue', {deleteIssueId: deleteIssueId});
+      const response = await axios.post(SAPIBase + '/deleteissue', {deleteIssueId: deleteIssueId, userId: loggedinId});
       if (response.status === 200) {
         setDeleteModalClass('modal is-active');
       } else {
@@ -169,33 +183,6 @@ const HomePage = () => {
     </div>
   }
   
-  const cardList = issueList.map((issue) => (
-    <div className="card" style={{marginTop:'5px', marginBottom:'5px'}}>
-      <header className="card-header">
-        <p className="card-header-title">
-          {issue.title}
-        </p>
-      </header>
-      <div className="card-content">
-        <div className="content">
-          <p>작성자 : {issue.authorUserId}</p>
-          <p style={issue.startTime === '1970-01-01T00:00:00.000Z' ? {display: 'none'} : {} } >시작 시각 : {new Date(issue.startTime).toLocaleString()}</p>
-          {/* postgres 시간을 js 형식으로 바꿔야 함. 지금은 1970년으로 뜸 */}
-          <p style={issue.endTime === '1970-01-01T00:00:00.000Z' ? {display: 'none'} : {} } >종료 시각 : {new Date(issue.endTime).toLocaleString()}</p>
-          <hr></hr>
-          {issue.content}
-        </div>
-        <hr/>
-        <div className="content">
-          
-        </div>
-        <footer className="card-footer">
-          <button style={{marginLeft:'5px', marginRight:'5px'}} className="button card-footer-item">Edit</button>
-          <button style={(loggedinId === issue.authorUserId) ? {marginLeft:'5px', marginRight:'5px'} : {marginLeft:'5px', marginRight:'5px', display: 'none'}} className="button card-footer-item" onClick={(event) => deleteIssue(event, issue.id)}>Delete</button>
-        </footer>
-      </div>
-    </div>
-  ));
   
   const locNameList = Array.from( locMap.keys() )
   const dropdownList = locNameList.map((locName) => {
@@ -240,23 +227,107 @@ const HomePage = () => {
         startTime: newIssueStartTime, 
         endTime: newIssueEndTime, 
         locationNum: locFilter.locFilter,
-        authorUserId: loggedinId });
-      if (response.status === 200) {
-        setCUDCount(CUDCount + 1);
-        setnewIssueTitle('');
-        setNewIssueStartTime(null);
-        setNewIssueEndTime(null);
-        setNewIssueContent('');
-        setCreateModalClass('modal is-active');
-      } else {
-        setCreateFailModalClass('modal is-active');
+        authorUserId: loggedinId,
+        userId: loggedinId }); // middleware 위해 이름 맞춰서 더..
+        if (response.status === 200) {
+          setCUDCount(CUDCount + 1);
+          setNewIssueTitle('');
+          setNewIssueStartTime(null);
+          setNewIssueEndTime(null);
+          setNewIssueContent('');
+          setCreateModalClass('modal is-active');
+        } else {
+          setCreateFailModalClass('modal is-active');
+        }
+        
       }
-      
+      asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
     }
-    asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
-  }
+    
+    const editButton = (event, id) => {
+      event.preventDefault();
+      setEditIssueId(id);
+    }
 
-  console.log(issueList);
+    const editIssue = ((event, id) => {
+      event.preventDefault();
+      const asyncFun = async () => {
+        const response = await axios.post(SAPIBase + '/editissue', {
+          title: editIssueTitle, 
+          content: editIssueContent, 
+          startTime: editIssueStartTime, 
+          endTime: editIssueEndTime, 
+          locationNum: locFilter.locFilter,
+          authorUserId: loggedinId,
+          userId: loggedinId,
+          id: id }); // middleware 위해 이름 맞춰서 더..
+          if (response.status === 200) {
+            setCUDCount(CUDCount + 1);
+            setEditIssueId(null);
+            setEditIssueTitle('');
+            setEditIssueStartTime(null);
+            setEditIssueEndTime(null);
+            setEditIssueContent('');
+            setEditModalClass('modal is-active');
+          } else {
+            setEditFailModalClass('modal is-active');
+          }
+        
+      }
+      asyncFun().catch((e) => window.alert(`AN ERROR OCCURED! ${e}`));
+    });
+
+    const editCancel = (event) => {
+      event.preventDefault();
+      setEditIssueId(null);
+      setEditIssueTitle('');
+      setEditIssueStartTime(null);
+      setEditIssueEndTime(null);
+      setEditIssueContent('');
+    }
+
+    const cardList = issueList.map((issue) => (
+      <div className="card" style={{marginTop:'5px', marginBottom:'5px'}}>
+        <form onSubmit={(event) => editIssue(event, issue.id)}>
+          <header className="card-header">
+            <p className="card-header-title" style={issue.id !== editIssueId ? {} : {display: 'none'}}>
+              {issue.title}
+            </p>
+            <input className='input' style={issue.id === editIssueId ? {} : {display: 'none'}} required aria-required="true" type='text' placeholder='issue 제목 수정' value={editIssueTitle} onChange={(e) => setEditIssueTitle(e.target.value)}></input>
+          </header>
+          <div className="card-content">
+            <div className="content">
+              <p>작성자 : {issue.authorUserId}</p>
+              <p style={(issue.startTime === '1970-01-01T00:00:00.000Z') ||(issue.id === editIssueId)  ? {display: 'none'} : {} } >시작 시각 : {new Date(issue.startTime).toLocaleString()}</p>
+              <div style={(issue.id !== editIssueId)  ? {display: 'none'} : {} }>
+                <p>시작 시각 수정 : </p>
+                <input className='input' type='datetime-local' value={editIssueStartTime} onChange={(e) => setEditIssueStartTime(e.target.value)} />
+              </div>
+              <p style={(issue.endTime === '1970-01-01T00:00:00.000Z') ||(issue.id === editIssueId) ? {display: 'none'} : {} } >종료 시각 : {new Date(issue.endTime).toLocaleString()}</p>
+              <div style={(issue.id !== editIssueId)  ? {display: 'none'} : {} }>
+                <p>종료 시각 수정 : </p>
+                <input className='input' type='datetime-local' value={editIssueEndTime} onChange={(e) => setEditIssueEndTime(e.target.value)} />
+              </div>
+              <div style={(issue.id === editIssueId) ? {display: 'none'} : {} }>
+                {issue.content}
+              </div>
+              <div style={(issue.id !== editIssueId) ? {display: 'none'} : {} }>
+                <p className='content' style={{margin: '5px', marginBottom: '0px'}}>설명 : </p>
+                <textarea className="textarea has-fixed-size"  required aria-required="true" placeholder="issue 설명 수정" value={editIssueContent} onChange={(e) => setEditIssueContent(e.target.value)}></textarea>
+              </div>
+            </div>
+            <footer className="card-footer" style={(loggedinId === issue.authorUserId) ? {} : {display: 'none'}}>
+              <button style={(issue.id === editIssueId) ? {marginTop: '7px', marginLeft:'5px', marginRight:'5px', display: 'none'} : {marginTop: '7px', marginLeft:'5px', marginRight:'5px'}} className="button" onClick={(event) => editButton(event, issue.id)}>수정</button>
+              <button type="submit" style={(issue.id !== editIssueId) ? {marginTop: '7px', marginLeft:'5px', marginRight:'5px', display: 'none'} : {marginTop: '7px', marginLeft:'5px', marginRight:'5px'}} className="button is-primary">수정하기!</button>
+              <button style={(issue.id === editIssueId) ? {marginTop: '7px', marginLeft:'5px', marginRight:'5px', display: 'none'} : {marginTop: '7px', marginLeft:'5px', marginRight:'5px'}} className="button" onClick={(event) => deleteIssue(event, issue.id)}>삭제</button>
+              <button style={(issue.id !== editIssueId) ? {marginTop: '7px', marginLeft:'5px', marginRight:'5px', display: 'none'} : {marginTop: '7px', marginLeft:'5px', marginRight:'5px'}} className="button" onClick={(event) => editCancel(event)}>수정 취소</button>
+            </footer>
+          </div>
+        </form>
+      </div>
+    ));
+    
+    console.log(issueList);
   return (
     <CookiesProvider>
       <div className="columns">
@@ -297,7 +368,7 @@ const HomePage = () => {
               </header>
               <span style={{marginBottom: '3px'}}>
                 <p className='content' style={{margin: '5px', marginBottom: '0px'}} >제목</p>
-                <input className='input'  required aria-required="true" type='text' placeholder='issue 제목' value={newIssueTitle} onChange={(e) => setnewIssueTitle(e.target.value)}></input>
+                <input className='input'  required aria-required="true" type='text' placeholder='issue 제목' value={newIssueTitle} onChange={(e) => setNewIssueTitle(e.target.value)}></input>
               </span>
               <span style={{marginBottom: '3px'}}>
                 <p className='content' style={{margin: '5px', marginBottom: '0px'}}>시작 시각 (선택)</p>
@@ -374,6 +445,32 @@ const HomePage = () => {
             </div>
           </div>
         </div>
+        <div className={editModalClass} id='fail-modal'>
+            <div className="modal-background"></div>
+            <div className="modal-content">
+              <div className='card'>
+                <div className='card-content'>
+                  issue가 수정되었습니다.
+                </div>
+                <footer className='modal-card-foot'>
+                  <button className="button" aria-label="close" onClick={closeEditModal}>닫기</button>
+                </footer>
+              </div>
+            </div>
+          </div>
+          <div className={editFailModalClass} id='fail-modal'>
+            <div className="modal-background"></div>
+            <div className="modal-content">
+              <div className='card'>
+                <div className='card-content'>
+                  issue 수정ㄴ에 실패했습니다.
+                </div>
+                <footer className='modal-card-foot'>
+                  <button className="button" aria-label="close" onClick={closeEditFailModal}>닫기</button>
+                </footer>
+              </div>
+            </div>
+          </div>
         
     </CookiesProvider>
   )

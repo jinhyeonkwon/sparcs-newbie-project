@@ -8,6 +8,8 @@ import PageNotFound from "./pages/404";
 
 //import './App.css'
 import './css/mystyles.css';
+import axios from 'axios';
+import { SAPIBase } from './tools/api';
 
 const activeStyle = {
   color: '#8A4D76',
@@ -21,16 +23,34 @@ const deactiveStyle = {
 
 function App() {
   const [cookie, setCookie, removeCookie] = useCookies(['loggedinId']);
-  const [loggedinId, setLoggedinId] = useState('');
+  const [loggedinId, setLoggedinId] = useState(null);
+  const [roleId, setRoleId] = useState(null);
+  const [reRenderCount, setReRenderCount] = useState(0); // 로그아웃하면 다시 그려야
 
   React.useEffect(() => {
     console.log(cookie.loggedinId);
     if (cookie.loggedinId !== undefined) {
       setLoggedinId(cookie.loggedinId);
     }
+
+    const asyncFun = async () => {
+      const response = await axios.post(SAPIBase + `/getroleid?userId=${loggedinId}`);
+      setRoleId(response.body);
+    }
+
   }, [])
+
+  const logout = (event) => { // 마찬가지로 단순 쿠키 삭제!
+    event.preventDefault();
+    removeCookie('loggedinId', {path: '/'});
+    setLoggedinId(null);
+    setReRenderCount(reRenderCount + 1);
+    window.location.href = `${window.location.href}`; // 리다이렉트
+  }
   
   console.log(cookie);
+  console.log('아이디');
+  console.log(loggedinId);
   return (
     <CookiesProvider>
       <div>
@@ -61,7 +81,9 @@ function App() {
           </div>
           <div className='navbar-end'>
             <div className="navbar-item">
-              <img src="public/Sample_User_Icon.png"></img><p style={{marginRight: '10px', marginLeft: '10px', color: 'black'}}>{(loggedinId !== undefined) ? loggedinId : "로그인해 주세요"}</p>
+              <img src="public/Sample_User_Icon.png"></img>
+              <p style={{marginRight: '10px', marginLeft: '10px', color: 'black'}}>{(loggedinId !== undefined) && (loggedinId !== null) ? loggedinId : "로그인해 주세요"}</p>
+              <button className="button" style={(loggedinId === undefined) || (loggedinId === null) ? {display: 'none'} : {}} onClick={logout}>로그아웃</button>
             </div>
           </div>
         </nav>
