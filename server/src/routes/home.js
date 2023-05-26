@@ -119,6 +119,28 @@ router.post('/editissue', async (req, res) => {
   }
 })
 
+router.post('/getroleid', async (req, res) => {
+  console.log('roleid 확인 진입');
+  try {
+    const userId = req.query.userId;
+    console.log(`userId : ${userId}`);
+    const thatUser = await prisma.user.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+    console.log(`thatUser === null : ${thatUser === null}`);
+    if (thatUser === null) {
+      return res.status(200).json({roleId: null});
+    } else {
+      return res.status(200).json({roleId: thatUser.roleId});
+    }
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ error: `isexists 오류` });
+  }
+})
+
 
 
 

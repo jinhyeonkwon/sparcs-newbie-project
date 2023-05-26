@@ -27,18 +27,30 @@ function App() {
   const [roleId, setRoleId] = useState(null);
   const [reRenderCount, setReRenderCount] = useState(0); // 로그아웃하면 다시 그려야
 
+  const asyncRoleCheck = async () => {
+    const response = await axios.post(SAPIBase + `/getroleid?userId=${loggedinId}`);
+    if (response.status === 200) {
+      alert(`roleId 확인 성공! : ${response.data.roleId}`);
+      setRoleId(response.data.roleId);
+    } else {
+      alert("roleId 확인 실패!");
+    }
+  }
+
   React.useEffect(() => {
     console.log(cookie.loggedinId);
     if (cookie.loggedinId !== undefined) {
       setLoggedinId(cookie.loggedinId);
     }
 
-    const asyncFun = async () => {
-      const response = await axios.post(SAPIBase + `/getroleid?userId=${loggedinId}`);
-      setRoleId(response.body);
-    }
-
   }, [])
+
+  React.useEffect(() => {
+    if ((loggedinId !== null) && (loggedinId !== undefined)) {
+      alert('roleId를 확인해야 함.');
+      asyncRoleCheck().catch((e) => window.alert(`roleId 확인 중에 망함! ${e}`));
+    }
+  }, [loggedinId]);
 
   const logout = (event) => { // 마찬가지로 단순 쿠키 삭제!
     event.preventDefault();
