@@ -42,7 +42,7 @@ const LoginPage = () =>{
         <div className='field'>
           <label className='label'>아이디</label>
           <div className='control'>
-            <input className='input' onChange={(e) => setTypedId(e.target.value)} value={typedId} type="text" pattern="^[a-zA-Z0-9]+$" maxLength={15} required placeholder='15글자 이하의 알파벳' />
+            <input className='input' onChange={(e) => setTypedId(e.target.value)} value={typedId} type="text" pattern="^[a-zA-Z0-9]+$" maxLength={15} required placeholder='15글자 이하의 알파벳/숫자' />
           </div>
         </div>
         <div className='field'>
