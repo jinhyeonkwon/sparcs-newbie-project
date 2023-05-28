@@ -1,127 +1,27 @@
-# Example Prisma + Express + React (JS) Project Setup for SPARCS Newbie Seminar (by Night)
+# SPARCS 신입생 프로젝트 : 'Issue'
 
-## How to Run
+## 프로젝트 설명
+- 교내 카페가 갑자기 문을 닫는 일이나, 오리연못에서 아기 거위가 걸어다닌다는 소소한 소식등을, 외출하고 나서 깨닫거나 기숙사에 돌아가고 나서 깨닫는 경우가 많습니다.
+- 이에 학교 내 다양한 건물에서 발생하는 일을 학우들이 자유롭게 기록하고 볼 수 있도록 하는 사이트를 제작하였습니다.
+- 구현한 기능
+  1. 로그인 : 유저는 일반 유저 / 정지 유저 / 관리자로 나뉩니다.
+  2. 회원가입 : UI 상으로는 일반 유저로 가입하는 것만 지원합니다.
+  3. 이슈 추가, 수정, 삭제 : 일반 유저는 이슈 추가, 본인이 쓴 이슈에 대한 수정 및 삭제가 가능합니다. 정지 유저는 본인이 쓴 이슈에 대한 작업을 포함한 모든 활동이 정지됩니다. 관리자는 이슈 추가와 함께 모든 이슈를 수정, 삭제할 수 있습니다.
+  4. 필터 : 특정 건물의 이슈 보기(기본), 종료 시각이 과거인 이슈 제외하기
 
-### Operating System
-
-1. This project template uses `Makefile`, `Environment Variables`, `Bash Scripts` which may encounter some trouble in non-UNIX systems
-2. Using Linux / MacOS OR WSL2 is recommended
-
-### Installing Docker
-
-Using `Docker` is required to use the packaged `postgres` database
-
-For Linux Systems, note [Docker Installation Docs](https://docs.docker.com/engine/install/ubuntu/)
-
-For MacOS / Windows, [Install Docker Desktop](https://www.docker.com/products/docker-desktop/)
-
-* For Windows, you must [Enable WSL integration](https://learn.microsoft.com/ko-kr/windows/wsl/tutorials/wsl-containers)
-
-**[Common Errors]**
-
-```
-Error response from daemon: Bad response from Docker engine
-```
-
-* Check if Docker Desktop is runninng
-
-```
-docker: Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post http://%2Fvar%2Frun%2Fdocker.sock/v1.35/containers/create: dial unix /var/run/docker.sock: connect: permission denied. See 'docker run --help'.
-```
-
-* Docker requires SUDO privileges to run.
-
-### Setting up .env Files
-
-Environment variables are used to manage  environment-specific values (like port numbers, API Endpoints etc.) and secrets.
-
-.env.* files are NOT uploaded to Git using `.gitignore`
-
-Environment variables can be defined by adding `KEY=VALUE` pairs in `.env` files. (This is loaded through `vite` or `dotenv` or `docker`)
-
-Environment variables can be accessed in JavaScript using `process.env.VARIABLE_NAME`
-
-
-**[DATABASE]**
-
-- `cp .docker/.env.example .docker/.env`
-- Edit POSTGRES_PASSWORD Field
-
-**[SERVER]**
-
-- Development (with yarn dev / yarn start)
-  - `cp server/.env.development.example server/.env.development`
-  - This environment will only get loaded  in development 
-
-- Production (with yarn production)
-  - `cp server/.env.production.example server/.env.production`
-  - This environment will only get loaded in production
-
-**[CLIENT]**
-
-- Development (with yarn dev)
-  - `cp client/.env.development.example client/.env.development`
-  - This environment will only get loaded in development
-  - DO NOT PUT SECRETS IN CLIENT .env (This will be sent to the user)
-- Production (with yarn build -> dist)
-  - `cp client/.env.production.example client/.env.production` 
-  - This environment will only get loaded in production
-  - DO NOT PUT SECRETS IN CLIENT .env (This will be sent to the user)
-
-### Installing Packages
-
-`node v18.12` is required.
-Install using `nvm use`.
-
-It is recommended to use `yarn v1`
-`npm install --global yarn`
-
-Yarn v1 is fully compatible with NPM.
-
-- `yarn install`
-- `cd client && yarn install`
-- `cd server && yarn install`
-
-When adding packages, **Remember to check the Current Working Directory**
-
-`yarn add <Package Name>` for CLIENT (REACT) should **only** be installed in `/client`
-
-`yarn add <Package Name>` for SERVER (EXPRESS) should **only** be installed in `/server`
-
-**DO NOT INSTALL PACAKGES AT PROJECT ROOT**
-
-### Starting the Server
-**RUN ALL OF THE FOLLOWING COMMANDS @ PROJECT ROOT** 
-- `make run-dev`
-  - Starts the Postgres server @localhost:POSTGRES_PORT
-- `make stop-dev`
-  - Stops the Postgres server
-- `yarn dev`
-  - Starts Dev Servers for both Client & Server
-  - Fully Supports Hot-Reloading
-
-
-****
-
-## Folder Structure (Monorepo)
-
-### /
-
-- The root directory
-- You can run `yarn dev` to run both client & server locally at the same time
-- You should **almost never** run `yarn add` in the root directory
-- Contains Makefiles to run Docker Container containing Postgres
-
-### /client
-
-- The client directory
-- Contains React + FrontEnd Code (in JS)
-- Uses Vite (SWC)
-
-### /server
-
-- The server directory
-- Contains Express + Prisma Setup
-
-
-## Repository Structure
+---
+## 실행 관련 정보
+### 1. 공통
+- node v18.12를 사용합니다.
+- yarn v1을 사용합니다.
+### 2. 서버
+- 데이터베이스로는 postgreSQL을, ORM으로는 prisma를 사용합니다.
+- root 폴더에서 `make run-dev` : 데이터베이스 서버 시작 (docker container)
+- 개발용 환경 변수는 .env.development, 배포용 환경 변수는 .env.production에 작성합니다.
+### 3. 클라이언트
+- React.js를 사용합니다.
+### 4. 데이터베이스 설정
+- /server에서 `npx prisma db push` : /server/prisma/schema.prisma에 정의된 schema대로 DB를 설정합니다.
+- /server에서 `npx prisma db seed` : /server/prisma/seed.js에 들어 있는 기본값을 DB에 seed합니다.
+### 5. 개발용 실행
+- root 폴더에서 `yarn dev` : 개발용으로 클라이언트와 서버 모두 실행해볼 수 있습니다.
