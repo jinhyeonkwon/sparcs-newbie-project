@@ -20,6 +20,7 @@
 - 개발용 환경 변수는 .env.development, 배포용 환경 변수는 .env.production에 작성합니다.
 ### 3. 클라이언트
 - React.js를 사용합니다.
+- 디자인을 위해 CSS 라이브러리 <a href="https://bulma.io/">bulma</a>를 사용했습니다.
 ### 4. 데이터베이스 설정
 - /server에서 `npx prisma db push` : /server/prisma/schema.prisma에 정의된 schema대로 DB를 설정합니다.
 - /server에서 `npx prisma db seed` : /server/prisma/seed.js에 들어 있는 기본값을 DB에 seed합니다.
