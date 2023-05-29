@@ -1,6 +1,6 @@
 # SPARCS 신입생 프로젝트 : 'Issue'
 
-# 23.05.29. 심사용 자료
+## 23.05.29. 심사용 자료
 - 개선 사항 : <a href="https://jinhyeonkwon.notion.site/e9817e44613d4ad2938d4de8283fcca2">클릭</a>
 - E-R diagram
 <img src="./Newbie-Proj_ERD.png"/>
